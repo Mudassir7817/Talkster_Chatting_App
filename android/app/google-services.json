@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "492173230323",
+    "project_id": "talkster-6440a",
+    "storage_bucket": "talkster-6440a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492173230323:android:c76060a700d88089787786",
+        "android_client_info": {
+          "package_name": "com.example.talkster_chatting_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "492173230323-qg5bm62vl2eirgnng85qgp3sr19to52c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.talkster_chatting_app",
+            "certificate_hash": "5ddc71a6d07a8e8ee4e3d24a7934cda0bd4bb7bf"
+          }
+        },
+        {
+          "client_id": "492173230323-ngovkgoirdbd0o63li3msu9t6idc9cmk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQZXa82BJPmKmBoElEgeua5uQX9_TfD40"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "492173230323-f0f8lijk1a29ka1bscp8jvttebp2s5m6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "492173230323-ccd9sa1n6f1dc7r71d7n4dmubm576q3k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.talksterChattingApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

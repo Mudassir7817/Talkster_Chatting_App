@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>492173230323-ccd9sa1n6f1dc7r71d7n4dmubm576q3k.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.492173230323-ccd9sa1n6f1dc7r71d7n4dmubm576q3k</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBb8dIABzoV6XOiAUbi6WE_CrZGFBp9KMY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>492173230323</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.talksterChattingApp</string>
+	<key>PROJECT_ID</key>
+	<string>talkster-6440a</string>
+	<key>STORAGE_BUCKET</key>
+	<string>talkster-6440a.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:492173230323:ios:e5e91f53c0daac94787786</string>
+</dict>
+</plist>
