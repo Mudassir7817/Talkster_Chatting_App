@@ -1,11 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:talkster_chatting_app/api/Api.dart';
+import 'package:talkster_chatting_app/helper/time_helper.dart';
 import 'package:talkster_chatting_app/screens/ChatScreen.dart';
 
 import '../main.dart';
 import '../model/ChatUser.dart';
+import '../model/Messages.dart';
 
 class ChatCard extends StatefulWidget {
   final ChatUser user;
@@ -19,6 +22,7 @@ class ChatCard extends StatefulWidget {
 }
 
 class _ChatCardState extends State<ChatCard> {
+  Messages? message;
   _ChatCardState();
   @override
   Widget build(BuildContext context) {
@@ -37,6 +41,10 @@ class _ChatCardState extends State<ChatCard> {
             child: StreamBuilder(
               stream: APIs.getLastMsg(widget.user),
               builder: (context, snapshot) {
+                final data = snapshot.data?.docs;
+                if (data != null && data.first.exists) {
+                  message = Messages.fromJson(data.first.data());
+                }
                 return ListTile(
                   // leading: CircleAvatar(child: Icon(CupertinoIcons.person)),
                   leading: ClipRRect(
@@ -56,15 +64,28 @@ class _ChatCardState extends State<ChatCard> {
                     widget.user.name,
                     style: TextStyle(fontSize: 17),
                   ),
-                  trailing: Container(
-                    width: 15,
-                    height: 15,
-                    decoration: BoxDecoration(
-                        color: Colors.greenAccent.shade700,
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  subtitle:
-                      Text(widget.user.about, style: TextStyle(fontSize: 15)),
+                  trailing: message == null
+                      ? null
+                      : message!.read.isEmpty &&
+                              message!.fromId != APIs.user.uid
+                          ? Container(
+                              width: 15,
+                              height: 15,
+                              decoration: BoxDecoration(
+                                  color: Colors.greenAccent.shade700,
+                                  borderRadius: BorderRadius.circular(10)),
+                            )
+                          : Text(
+                              TimeHelper.getLastMsgTime(
+                                  context: context, time: message!.sent),
+                              style: TextStyle(fontSize: 12)),
+                  subtitle: Text(
+                      message != null
+                          ? message?.type == Type.image
+                              ? 'Photo'
+                              : message!.msg
+                          : widget.user.about,
+                      style: TextStyle(fontSize: 15)),
                 );
               },
             )),

@@ -1,22 +1,22 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:talkster_chatting_app/helper/time_helper.dart';
-
 import '../api/Api.dart';
 import '../main.dart';
 import '../model/Messages.dart';
 
-class ChattingScreen extends StatefulWidget {
+class Messages_Container extends StatefulWidget {
   final Messages msg;
-  const ChattingScreen({
+  const Messages_Container({
     Key? key,
     required this.msg,
   }) : super(key: key);
 
   @override
-  State<ChattingScreen> createState() => _ChattingScreenState();
+  State<Messages_Container> createState() => _Messages_ContainerState();
 }
 
-class _ChattingScreenState extends State<ChattingScreen> {
+class _Messages_ContainerState extends State<Messages_Container> {
   @override
   Widget build(BuildContext context) {
     return APIs.me.id == widget.msg.fromId ? greenMsg() : blueMsg();
@@ -31,7 +31,9 @@ class _ChattingScreenState extends State<ChattingScreen> {
       children: [
         Flexible(
           child: Container(
-            padding: EdgeInsets.all(mq.width * .03),
+            padding: EdgeInsets.all(widget.msg.type == Type.image
+                ? mq.width * .01
+                : mq.width * .03),
             margin: EdgeInsets.symmetric(
                 horizontal: mq.width * .04, vertical: mq.height * .01),
             decoration: BoxDecoration(
@@ -43,10 +45,25 @@ class _ChattingScreenState extends State<ChattingScreen> {
               ),
               color: Color.fromARGB(255, 216, 232, 247),
             ),
-            child: Text(
-              widget.msg.msg,
-              style: TextStyle(fontSize: 18),
-            ),
+            child: widget.msg.type == Type.image
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(mq.height * 0.05),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.msg.msg,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => CircleAvatar(
+                          child: Icon(
+                        Icons.image,
+                        size: mq.width * .3,
+                      )),
+                    ),
+                  )
+                : Text(
+                    widget.msg.msg,
+                    style: TextStyle(fontSize: 18),
+                  ),
           ),
         ),
         Row(children: [
@@ -115,10 +132,25 @@ class _ChattingScreenState extends State<ChattingScreen> {
               ),
               color: Color.fromARGB(255, 219, 248, 220),
             ),
-            child: Text(
-              widget.msg.msg,
-              style: TextStyle(fontSize: 18),
-            ),
+            child: widget.msg.type == Type.image
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(mq.height * 0.01),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.msg.msg,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          CircularProgressIndicator(),
+                      errorWidget: (context, url, error) => CircleAvatar(
+                          child: Icon(
+                        Icons.image,
+                        size: mq.width * .3,
+                      )),
+                    ),
+                  )
+                : Text(
+                    widget.msg.msg,
+                    style: TextStyle(fontSize: 18),
+                  ),
           ),
         ),
       ],

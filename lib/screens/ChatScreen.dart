@@ -2,10 +2,13 @@
 
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:talkster_chatting_app/model/ChatUser.dart';
 
@@ -13,7 +16,7 @@ import '../ThemeColor.dart';
 import '../api/Api.dart';
 import '../main.dart';
 import '../model/Messages.dart';
-import 'ChattingScreen.dart';
+import 'Messages.dart';
 import 'HomeScreen.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -30,57 +33,87 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   List<Messages> _list = [];
   final textController = TextEditingController();
+  bool isEmoji = false;
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          flexibleSpace: _appBar(),
-        ),
-        body: Column(children: [
-          Expanded(
-            child: StreamBuilder(
-                stream: APIs.getAllMsg(widget.user),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    //if data is loading
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                    // return Center(child: CircularProgressIndicator());
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: WillPopScope(
+          onWillPop: () {
+            if (isEmoji) {
+              setState(() {
+                isEmoji = !isEmoji;
+              });
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: false,
+              flexibleSpace: _appBar(),
+            ),
+            backgroundColor: Colors.blue.shade50,
+            body: Column(children: [
+              Expanded(
+                child: StreamBuilder(
+                    stream: APIs.getAllMsg(widget.user),
+                    builder: (context, snapshot) {
+                      switch (snapshot.connectionState) {
+                        //if data is loading
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                        // return Center(child: CircularProgressIndicator());
 
-                    //if some or all data is loaded the show it:
-                    case ConnectionState.active:
-                    case ConnectionState.done:
-                      final Data = snapshot.data?.docs;
-                      _list = Data?.map((e) => Messages.fromJson(e.data()))
-                              .toList() ??
-                          [];
-                  }
-
-                  if (_list.isNotEmpty) {
-                    return ListView.builder(
-                        itemCount: _list.length,
-                        padding: EdgeInsets.only(top: mq.width * .03),
-                        physics: BouncingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return ChattingScreen(
-                            msg: _list[index],
-                          );
-                        });
-                  } else {
-                    return Center(
-                      child: Text(
-                        "Say Hello!",
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                    );
-                  }
-                }),
+                        //if some or all data is loaded the show it:
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final Data = snapshot.data?.docs;
+                          _list = Data?.map((e) => Messages.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+                      }
+                      if (_list.isNotEmpty) {
+                        return ListView.builder(
+                            reverse: true,
+                            itemCount: _list.length,
+                            padding: EdgeInsets.only(top: mq.width * .03),
+                            physics: BouncingScrollPhysics(),
+                            itemBuilder: (context, index) {
+                              return Messages_Container(
+                                msg: _list[index],
+                              );
+                            });
+                      } else {
+                        return Center(
+                          child: Text(
+                            "Say Hello!",
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      }
+                    }),
+              ),
+              _chatInput(),
+              if (isEmoji)
+                SizedBox(
+                  height: mq.height * .35,
+                  child: EmojiPicker(
+                    textEditingController: textController,
+                    config: Config(
+                      columns: 8,
+                      emojiSizeMax: 26 * (Platform.isIOS ? 1.30 : 1.0),
+                      initCategory: Category.RECENT,
+                      bgColor: Color(0xFFF2F2F2),
+                    ),
+                  ),
+                )
+            ]),
           ),
-          _chatInput()
-        ]),
+        ),
       ),
     );
   }
@@ -149,13 +182,29 @@ class _ChatScreenState extends State<ChatScreen> {
                 children: [
                   IconButton(
                       iconSize: 26,
-                      onPressed: () {},
-                      icon: Icon(
-                        Icons.emoji_emotions_outlined,
+                      onPressed: () {
+                        setState(() {
+                          isEmoji = !isEmoji;
+                        });
+                      },
+                      icon: IconButton(
                         color: clr,
+                        icon: Icon(Icons.emoji_emotions_outlined),
+                        onPressed: () {
+                          setState(() {
+                            FocusScope.of(context).unfocus();
+                            isEmoji = !isEmoji;
+                          });
+                        },
                       )),
                   Expanded(
                     child: TextField(
+                      onTap: () {
+                        if (isEmoji)
+                          setState(() {
+                            isEmoji = !isEmoji;
+                          });
+                      },
                       controller: textController,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,
@@ -174,7 +223,17 @@ class _ChatScreenState extends State<ChatScreen> {
                       )),
                   IconButton(
                     iconSize: 26,
-                    onPressed: () {},
+                    onPressed: () async {
+                      final ImagePicker picker = ImagePicker();
+
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.camera);
+
+                      if (image != null) {
+                        log("message");
+                        await APIs.sendChatImage(widget.user, File(image.path));
+                      }
+                    },
                     icon: Icon(
                       Icons.camera_alt_rounded,
                       color: clr,
@@ -191,8 +250,8 @@ class _ChatScreenState extends State<ChatScreen> {
             shape: CircleBorder(),
             onPressed: () {
               if (textController.text.isNotEmpty) {
-                APIs.sendMsg(widget.user, textController.text);
-                textController.clear();
+                APIs.sendMsg(widget.user, textController.text, Type.text);
+                textController.text = '';
               }
             },
             child: Icon(

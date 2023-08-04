@@ -1,10 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:talkster_chatting_app/model/ChatUser.dart';
-
 import '../model/Messages.dart';
 
 class APIs {
@@ -93,11 +92,12 @@ class APIs {
       ChatUser chatUser) {
     return fireStore
         .collection("Chats/${getConvoid(chatUser.id)}/messages")
+        .orderBy("sent", descending: true)
         .snapshots();
   }
 
   //For Sending msgs
-  static Future<void> sendMsg(ChatUser chatUser, String msgs) async {
+  static Future<void> sendMsg(ChatUser chatUser, String msgs, Type type) async {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
     final message = Messages(
@@ -105,7 +105,7 @@ class APIs {
         read: '',
         fromId: user.uid,
         toId: chatUser.id,
-        type: Type.text,
+        type: type,
         sent: time);
     final ref =
         fireStore.collection("Chats/${getConvoid(chatUser.id)}/messages");
@@ -123,7 +123,22 @@ class APIs {
       ChatUser chatUser) {
     return fireStore
         .collection("Chats/${getConvoid(chatUser.id)}/messages/")
+        .orderBy("sent", descending: true)
         .limit(1)
         .snapshots();
+  }
+
+  static Future<void> sendChatImage(ChatUser chatuser, File file) async {
+    final ext = file.path.split('.').last;
+
+    final ref = storage.ref().child(
+        "Chat images/${getConvoid(chatuser.id)}/${DateTime.now().millisecondsSinceEpoch}.$ext");
+
+    await ref
+        .putFile(file, SettableMetadata(contentType: 'Chat images/$ext'))
+        .then((p0) => log('Data Transfered'));
+
+    final imageURL = await ref.getDownloadURL();
+    await sendMsg(chatuser, imageURL, Type.image);
   }
 }
