@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:talkster_chatting_app/screens/SettingsScreen.dart';
 import '../ThemeColor.dart';
 import '../api/Api.dart';
@@ -24,6 +25,17 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     APIs.getSelfInfo();
+    APIs.updateActiveStatus(true);
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      if (APIs.auth.currentUser != null) {
+        if (message.toString().contains('resume'))
+          APIs.updateActiveStatus(true);
+
+        if (message.toString().contains('pause'))
+          APIs.updateActiveStatus(false);
+      }
+      return Future.value(message);
+    });
   }
 
   @override

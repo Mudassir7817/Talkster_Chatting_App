@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -179,9 +180,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding: const EdgeInsets.all(14),
         child: FloatingActionButton.extended(
           onPressed: () async {
+            await APIs.updateActiveStatus(false);
             Dialogs.newProgressBar(context);
             await APIs.auth.signOut().then((value) async {
               await GoogleSignIn().signOut().then((value) {
+                APIs.auth = FirebaseAuth.instance;
                 Navigator.pop(context);
                 Navigator.pop(context);
                 Navigator.pushReplacement(

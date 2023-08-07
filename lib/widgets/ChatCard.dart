@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:talkster_chatting_app/api/Api.dart';
 import 'package:talkster_chatting_app/helper/time_helper.dart';
 import 'package:talkster_chatting_app/screens/ChatScreen.dart';
+import 'package:talkster_chatting_app/widgets/Dialogs/UserDp.dart';
 
 import '../main.dart';
 import '../model/ChatUser.dart';
-import '../model/Messages.dart';
+import '../model/Messages_Model.dart';
 
 class ChatCard extends StatefulWidget {
   final ChatUser user;
@@ -22,7 +23,7 @@ class ChatCard extends StatefulWidget {
 }
 
 class _ChatCardState extends State<ChatCard> {
-  Messages? message;
+  Messages_Model? message;
   _ChatCardState();
   @override
   Widget build(BuildContext context) {
@@ -43,21 +44,27 @@ class _ChatCardState extends State<ChatCard> {
               builder: (context, snapshot) {
                 final data = snapshot.data?.docs;
                 if (data != null && data.first.exists) {
-                  message = Messages.fromJson(data.first.data());
+                  message = Messages_Model.fromJson(data.first.data());
                 }
                 return ListTile(
-                  // leading: CircleAvatar(child: Icon(CupertinoIcons.person)),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(mq.height * .3),
-                    child: CachedNetworkImage(
-                      width: mq.height * .070,
-                      height: mq.height * .070,
-                      imageUrl: widget.user.image,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          CircularProgressIndicator(),
-                      errorWidget: (context, url, error) =>
-                          CircleAvatar(child: Icon(CupertinoIcons.person)),
+                  leading: InkWell(
+                    onTap: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => UserDp(user: widget.user));
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(mq.height * .3),
+                      child: CachedNetworkImage(
+                        width: mq.height * .070,
+                        height: mq.height * .070,
+                        imageUrl: widget.user.image,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) =>
+                            CircleAvatar(child: Icon(CupertinoIcons.person)),
+                      ),
                     ),
                   ),
                   title: Text(

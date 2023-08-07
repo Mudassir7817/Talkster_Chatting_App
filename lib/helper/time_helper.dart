@@ -1,24 +1,72 @@
 import 'package:flutter/material.dart';
 
 class TimeHelper {
-  static String getExactTime(
-      {required BuildContext context, required String time}) {
+  static String getExactTime({
+    required BuildContext context,
+    required String time,
+  }) {
     final date = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
     return TimeOfDay.fromDateTime(date).format(context);
   }
 
   static String getLastMsgTime(
-      {required BuildContext context, required String time}) {
-    final sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
-    final now = DateTime.now();
+      {required BuildContext context,
+      required String time,
+      bool showYear = false}) {
+    final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+    final DateTime now = DateTime.now();
 
     if (sent.month == now.month &&
         sent.day == now.day &&
         sent.year == now.year) {
       return TimeOfDay.fromDateTime(sent).format(context);
-    } else {
-      return '${sent.day} ${getMonth(sent)}';
     }
+    return showYear
+        ? '${sent.day} ${getMonth(sent)} ${now.year}'
+        : '${sent.day} ${getMonth(sent)}';
+  }
+
+  static String getMsgTime({
+    required BuildContext context,
+    required String time,
+  }) {
+    final DateTime sent = DateTime.fromMillisecondsSinceEpoch(int.parse(time));
+    final DateTime now = DateTime.now();
+
+    final formattedTime = TimeOfDay.fromDateTime(sent).format(context);
+    if (sent.month == now.month &&
+        sent.day == now.day &&
+        sent.year == now.year) {
+      return formattedTime;
+    }
+    return now.year == sent.year
+        ? '$formattedTime - ${sent.day} ${getMonth(sent)}'
+        : '$formattedTime - ${sent.day} ${getMonth(sent)} ${sent.year}';
+  }
+
+  static String getLastActiveTime(
+      {required BuildContext context, required String lastActive}) {
+    final int i = int.tryParse(lastActive) ?? -1;
+
+    if (i == -1) return 'Last Seen Not Available';
+
+    DateTime time = DateTime.fromMicrosecondsSinceEpoch(i);
+    DateTime now = DateTime.now();
+
+    String formattedTime = TimeOfDay.fromDateTime(time).format(context);
+
+    if (time.month == now.month &&
+        time.day == now.day &&
+        time.year == now.year) {
+      return 'Last seen today at $formattedTime';
+    }
+
+    if ((now.difference(time).inHours / 24).round() == 1) {
+      return 'Last seen yesterday at $formattedTime';
+    }
+
+    String month = getMonth(time);
+    return 'Last seen on ${time.day} $month at $formattedTime';
   }
 
   static String getMonth(DateTime time) {

@@ -1,12 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:talkster_chatting_app/helper/time_helper.dart';
 import '../api/Api.dart';
+import '../helper/dialog.dart';
 import '../main.dart';
-import '../model/Messages.dart';
+import '../model/Messages_Model.dart';
 
 class Messages_Container extends StatefulWidget {
-  final Messages msg;
+  final Messages_Model msg;
   const Messages_Container({
     Key? key,
     required this.msg,
@@ -19,7 +21,12 @@ class Messages_Container extends StatefulWidget {
 class _Messages_ContainerState extends State<Messages_Container> {
   @override
   Widget build(BuildContext context) {
-    return APIs.me.id == widget.msg.fromId ? greenMsg() : blueMsg();
+    bool isMe = APIs.me.id == widget.msg.fromId;
+    return InkWell(
+        onLongPress: () {
+          _showBottomSheet(isMe);
+        },
+        child: isMe ? greenMsg() : blueMsg());
   }
 
   Widget blueMsg() {
@@ -51,8 +58,10 @@ class _Messages_ContainerState extends State<Messages_Container> {
                     child: CachedNetworkImage(
                       imageUrl: widget.msg.msg,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          CircularProgressIndicator(),
+                      placeholder: (context, url) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
                       errorWidget: (context, url, error) => CircleAvatar(
                           child: Icon(
                         Icons.image,
@@ -138,8 +147,10 @@ class _Messages_ContainerState extends State<Messages_Container> {
                     child: CachedNetworkImage(
                       imageUrl: widget.msg.msg,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          CircularProgressIndicator(),
+                      placeholder: (context, url) => Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      ),
                       errorWidget: (context, url, error) => CircleAvatar(
                           child: Icon(
                         Icons.image,
@@ -154,6 +165,140 @@ class _Messages_ContainerState extends State<Messages_Container> {
           ),
         ),
       ],
+    );
+  }
+
+  void _showBottomSheet(bool isMe) {
+    showModalBottomSheet(
+        context: context,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        builder: (_) {
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              Container(
+                height: 4,
+                margin: EdgeInsets.symmetric(
+                    vertical: mq.height * .015, horizontal: mq.width * .4),
+                decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(20)),
+              ),
+              widget.msg.type == Type.image && isMe
+                  ? OptionItems(
+                      icon: Icon(
+                        Icons.download,
+                        size: 26,
+                        color: Colors.blue,
+                      ),
+                      name: 'Save image',
+                      onTap: () {})
+                  : OptionItems(
+                      icon: Icon(
+                        Icons.copy_all,
+                        size: 26,
+                        color: Colors.blue,
+                      ),
+                      name: 'Copy Text',
+                      onTap: () async {
+                        await Clipboard.setData(
+                                ClipboardData(text: widget.msg.msg))
+                            .then((value) {
+                          Dialogs.newSnackBar(context, 'Text Copied');
+                          Navigator.pop(context);
+                        });
+                        ;
+                      }),
+              if (widget.msg.type == Type.text && isMe)
+                Divider(
+                  color: Colors.black54,
+                  endIndent: mq.width * .04,
+                  indent: mq.width * .04,
+                ),
+              if (widget.msg.type == Type.text && isMe)
+                OptionItems(
+                    icon: Icon(
+                      Icons.edit,
+                      size: 26,
+                      color: Colors.blue,
+                    ),
+                    name: 'Edit Message',
+                    onTap: () {}),
+              OptionItems(
+                  icon: Icon(
+                    Icons.delete_forever,
+                    size: 26,
+                    color: Colors.red,
+                  ),
+                  name: 'Delete Message',
+                  onTap: () {
+                    APIs.deleteMsg(widget.msg);
+                    Navigator.pop(context);
+                  }),
+              Divider(
+                color: Colors.black54,
+                endIndent: mq.width * .04,
+                indent: mq.width * .04,
+              ),
+              OptionItems(
+                  icon: Icon(
+                    Icons.remove_red_eye,
+                    size: 26,
+                    color: Colors.blue,
+                  ),
+                  name:
+                      'Sent At: ${TimeHelper.getMsgTime(context: context, time: widget.msg.sent)}',
+                  onTap: () {}),
+              OptionItems(
+                  icon: Icon(
+                    Icons.remove_red_eye,
+                    size: 26,
+                    color: Colors.green,
+                  ),
+                  name: widget.msg.read.isEmpty
+                      ? 'Not readed yet'
+                      : 'Read At: ${TimeHelper.getMsgTime(context: context, time: widget.msg.read)}',
+                  onTap: () {}),
+            ],
+          );
+        });
+  }
+}
+
+class OptionItems extends StatelessWidget {
+  final Icon icon;
+  final String name;
+  final VoidCallback onTap;
+  const OptionItems(
+      {super.key, required this.icon, required this.name, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap(),
+      child: Padding(
+        padding: EdgeInsets.only(
+            top: mq.height * .015,
+            bottom: mq.height * .025,
+            left: mq.width * .05),
+        child: Row(
+          children: [
+            icon,
+            Flexible(
+              child: Text(
+                '       $name',
+                style: TextStyle(
+                    fontSize: 15, color: Colors.black54, letterSpacing: 0.5),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
