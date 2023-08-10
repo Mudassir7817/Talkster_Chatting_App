@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import 'package:talkster_chatting_app/model/ChatUser.dart';
 
-import '../api/Api.dart';
 import '../helper/time_helper.dart';
 import '../main.dart';
 

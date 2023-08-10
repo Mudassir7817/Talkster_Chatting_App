@@ -222,4 +222,12 @@ class APIs {
 
     await storage.refFromURL(message.msg);
   }
+
+  static Future<void> updateMsg(
+      Messages_Model message, String updatedMsg) async {
+    await fireStore
+        .collection("Chats/${getConvoid(message.toId)}/messages/")
+        .doc(message.sent)
+        .update({'msg': updatedMsg});
+  }
 }

@@ -228,7 +228,10 @@ class _Messages_ContainerState extends State<Messages_Container> {
                       color: Colors.blue,
                     ),
                     name: 'Edit Message',
-                    onTap: () {}),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showUpdateMsg();
+                    }),
               OptionItems(
                   icon: Icon(
                     Icons.delete_forever,
@@ -267,6 +270,60 @@ class _Messages_ContainerState extends State<Messages_Container> {
             ],
           );
         });
+  }
+
+  void _showUpdateMsg() {
+    String updatedMsg = widget.msg.msg;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding:
+            EdgeInsets.only(bottom: 10, left: 24, right: 24, top: 24),
+        title: Row(children: [
+          Icon(
+            Icons.message,
+            color: Colors.blue,
+            size: 24,
+          ),
+          Text(
+            '  Update Message',
+            style: TextStyle(fontSize: 20),
+          ),
+        ]),
+        content: TextFormField(
+          initialValue: updatedMsg,
+          maxLines: null,
+          onChanged: (value) => updatedMsg = value,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+        actions: [
+          MaterialButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Cancle',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          ),
+          MaterialButton(
+            onPressed: () {
+              APIs.updateMsg(widget.msg, updatedMsg);
+              Navigator.pop(context);
+            },
+            child: Text(
+              'Update',
+              style: TextStyle(color: Colors.blue, fontSize: 16),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }
 
